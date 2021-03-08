@@ -19,14 +19,14 @@ public class SampleBasicInfoDto implements Serializable {
     @TableField("inspectionUnit")
     private String inspectionUnit;
 
-    @TableField("inspectDate")
-    private LocalDate inspectDate;
+    @TableField("inspectionDate")
+    private LocalDate inspectionDate;
 
     @TableField("sampleType")
     private String sampleType;
 
-    @TableField("inspecteeType")
-    private String inspecteeType;
+    @TableField("inspectedType")
+    private String inspectedType;
 
     private String name;
 
@@ -46,7 +46,7 @@ public class SampleBasicInfoDto implements Serializable {
     private String educationalLevel;
 
     @TableField("IDNumber")
-    private String IDNumber;
+    private String idNumber;
 
     private String phone;
 

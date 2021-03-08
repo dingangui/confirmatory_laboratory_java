@@ -33,10 +33,11 @@ public class SampleBasicInfoController {
     @PostMapping("/save")
     public Result save(@Validated @RequestBody SampleBasicInfoDto sampleBasicInfoDto){
 
-        SampleBasicInfo sampleBasicInfo = new SampleBasicInfo();
+        System.out.println(sampleBasicInfoDto.toString());
+       /* SampleBasicInfo sampleBasicInfo = new SampleBasicInfo();
         BeanUtils.copyProperties(sampleBasicInfoDto,sampleBasicInfo);
-        Assert.isTrue(sampleBasicInfoService.save(sampleBasicInfo),"保存失败");
-        return Result.success(sampleBasicInfoDto);
+        Assert.isTrue(sampleBasicInfoService.save(sampleBasicInfo),"保存失败");*/
+        return Result.success(sampleBasicInfoDto.toString());
 
     }
 }
