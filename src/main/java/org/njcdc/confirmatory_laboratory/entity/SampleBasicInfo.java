@@ -33,14 +33,14 @@ public class SampleBasicInfo implements Serializable {
     @TableField("inspectionUnit")
     private String inspectionUnit;
 
-    @TableField("inspectDate")
-    private LocalDate inspectDate;
+    @TableField("inspectionDate")
+    private LocalDate inspectionDate;
 
     @TableField("sampleType")
     private String sampleType;
 
-    @TableField("inspecteeType")
-    private String inspecteeType;
+    @TableField("inspectedType")
+    private String inspectedType;
 
     private String name;
 

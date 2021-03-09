@@ -3,6 +3,7 @@ package org.njcdc.confirmatory_laboratory.common.dto;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -46,7 +47,8 @@ public class SampleBasicInfoDto implements Serializable {
     private String educationalLevel;
 
     @TableField("IDNumber")
-    private String idNumber;
+    @JsonProperty("IDNumber")
+    private String IDNumber;
 
     private String phone;
 
@@ -61,5 +63,6 @@ public class SampleBasicInfoDto implements Serializable {
 
     @TableField("dataEntryStaffName")
     private String dataEntryStaffName;
+
 
 }
