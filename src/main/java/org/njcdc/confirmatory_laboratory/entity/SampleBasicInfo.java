@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -60,6 +62,7 @@ public class SampleBasicInfo implements Serializable {
     private String educationalLevel;
 
     @TableField("IDNumber")
+    @JsonProperty
     private String IDNumber;
 
     private String phone;
