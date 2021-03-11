@@ -54,4 +54,13 @@ public class SampleBasicInfoController {
 
         return Result.success(sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber",acceptanceNumber)));
     }
+
+    @PostMapping("/update")
+    public Result update(@RequestBody SampleBasicInfo sampleBasicInfo){
+        QueryWrapper<SampleBasicInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("acceptanceNumber", sampleBasicInfo.getAcceptanceNumber());
+        Assert.isTrue(sampleBasicInfoService.update(sampleBasicInfo,queryWrapper),"修改失败");
+
+        return Result.success("修改成功",null);
+    }
 }
