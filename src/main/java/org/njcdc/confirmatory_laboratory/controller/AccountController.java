@@ -62,8 +62,9 @@ public class AccountController {
     @RequiresAuthentication
     @GetMapping("/logout")
     public Result logout(){
+        System.out.println("logout");
         SecurityUtils.getSubject().logout();
-        return Result.success(null);
+        return Result.success("已退出", null);
     }
 
 }

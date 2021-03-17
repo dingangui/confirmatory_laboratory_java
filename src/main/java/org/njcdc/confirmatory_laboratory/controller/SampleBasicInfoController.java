@@ -2,6 +2,7 @@ package org.njcdc.confirmatory_laboratory.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.SampleBasicInfo;
 import org.njcdc.confirmatory_laboratory.service.SampleBasicInfoService;
@@ -41,6 +42,7 @@ public class SampleBasicInfoController {
 
     }
 
+    @RequiresAuthentication
     @GetMapping("/getAcceptanceNumber")
     public Result getAcceptanceNumber() {
         Calendar cal = Calendar.getInstance();

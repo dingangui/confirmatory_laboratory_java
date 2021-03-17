@@ -69,12 +69,12 @@ public class AccountRealm extends AuthorizingRealm{
         String userId = jwtUtils.getClaimByToken((String)jwtToken.getPrincipal()).getSubject();
 
         // 根据ID获取user
-        User staffUser = userService.getOne(new QueryWrapper<User>().eq("su_id",Long.valueOf(userId)));
+        User account = userService.getOne(new QueryWrapper<User>().eq("id",Long.valueOf(userId)));
 
-        if (staffUser == null) {
+        if (account == null) {
             throw new UnknownAccountException("账户不存在");
         }
-        if (staffUser.getAdmin()) {
+        if (account.getAdmin()) {
             throw new LockedAccountException("账户不是管理员");
         }
 
@@ -85,7 +85,7 @@ public class AccountRealm extends AuthorizingRealm{
          * shiro通过subject工具获取用户信息
          */
         AccountProfile accountProfile = new AccountProfile();
-        BeanUtils.copyProperties(staffUser, accountProfile);
+        BeanUtils.copyProperties(account, accountProfile);
 
         return new SimpleAuthenticationInfo(accountProfile, jwtToken.getCredentials(), getName());
     }
