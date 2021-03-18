@@ -1,16 +1,18 @@
 package org.njcdc.confirmatory_laboratory.shiro;
 
+
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import io.jsonwebtoken.Claims;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.util.JwtUtils;
+import io.jsonwebtoken.Claims;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.ExpiredCredentialsException;
 import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
 import org.apache.shiro.web.util.WebUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
@@ -22,11 +24,8 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends AuthenticatingFilter {
 
-    final JwtUtils jwtUtils;
-
-    public JwtFilter(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
+    @Autowired
+    JwtUtils jwtUtils;
 
     // shiro 默认是 username + password 的 token，由下面的方法创建
     @Override

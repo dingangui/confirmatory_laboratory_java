@@ -5,6 +5,7 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.subject.Subject;
 import org.njcdc.confirmatory_laboratory.common.dto.LoginDto;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.User;
@@ -62,6 +63,8 @@ public class AccountController {
     @RequiresAuthentication
     @GetMapping("/logout")
     public Result logout(){
+        Subject currentUser = SecurityUtils.getSubject();
+        currentUser.isAuthenticated();
         System.out.println("logout");
         SecurityUtils.getSubject().logout();
         return Result.success("已退出", null);

@@ -2,9 +2,12 @@ package org.njcdc.confirmatory_laboratory.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.subject.Subject;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.SampleBasicInfo;
+import org.njcdc.confirmatory_laboratory.mapper.SampleBasicInfoMapper;
 import org.njcdc.confirmatory_laboratory.service.SampleBasicInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -22,7 +25,7 @@ import java.util.Calendar;
  * @since 2021-03-01
  */
 @RestController
-@RequestMapping("/sample-basic-info")
+@RequestMapping("/sampleBasicInfo")
 public class SampleBasicInfoController {
 
     @Autowired
@@ -35,19 +38,27 @@ public class SampleBasicInfoController {
         Calendar cal = Calendar.getInstance();
         System.out.println(sampleBasicInfo.toString());
         int num = sampleBasicInfoService.list().size();
-        String acceptanceNumber = cal.get(Calendar.YEAR) + " - " + (num + 1);
+        String acceptanceNumber = "A" + cal.get(Calendar.YEAR) + " - " + (num + 1);
         sampleBasicInfo.setAcceptanceNumber(acceptanceNumber);
+        sampleBasicInfo.setCurrentState("筛查实验室结果已导入");
+        sampleBasicInfo.setOperation("录入第一次复检结果");
+        sampleBasicInfo.setFlag("waitingForTest");
         Assert.isTrue(sampleBasicInfoService.save(sampleBasicInfo), "保存失败");
         return Result.success("保存成功");
 
     }
 
-    @RequiresAuthentication
     @GetMapping("/getAcceptanceNumber")
     public Result getAcceptanceNumber() {
+//
+//        Subject currentUser = SecurityUtils.getSubject();
+//
+//        currentUser.isAuthenticated();
+//
+//        currentUser.getPrincipal();
         Calendar cal = Calendar.getInstance();
-        int num = sampleBasicInfoService.list().size();
-        String acceptanceNumber = cal.get(Calendar.YEAR) + " - " + (num + 1);
+        int num = sampleBasicInfoService.count();
+        String acceptanceNumber = "A" + cal.get(Calendar.YEAR) + " - " + (num + 1);
         return Result.success(acceptanceNumber);
     }
 
@@ -64,5 +75,11 @@ public class SampleBasicInfoController {
         Assert.isTrue(sampleBasicInfoService.update(sampleBasicInfo,queryWrapper),"修改失败");
 
         return Result.success("修改成功",null);
+    }
+
+    @GetMapping("/getAllOperableSampleList")
+    public Result getAllOperableSampleList(){
+        System.out.println("currentState");
+        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().ne("currentState","表格可导出")));
     }
 }

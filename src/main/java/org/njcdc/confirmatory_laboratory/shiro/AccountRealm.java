@@ -8,7 +8,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.njcdc.confirmatory_laboratory.entity.User;
 import org.njcdc.confirmatory_laboratory.service.UserService;
 import org.njcdc.confirmatory_laboratory.util.JwtUtils;
-import org.springframework.beans.BeanUtils;
+import cn.hutool.core.bean.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,8 @@ import org.springframework.stereotype.Component;
  */
 @SuppressWarnings("ALL")
 @Component
-public class AccountRealm extends AuthorizingRealm{
+public class AccountRealm extends AuthorizingRealm {
+
     @Autowired
     JwtUtils jwtUtils;
 
@@ -66,7 +67,7 @@ public class AccountRealm extends AuthorizingRealm{
          */
 
         // 获取用户ID
-        String userId = jwtUtils.getClaimByToken((String)jwtToken.getPrincipal()).getSubject();
+        String userId = jwtUtils.getClaimByToken((String) jwtToken.getPrincipal()).getSubject();
 
         // 根据ID获取user
         User account = userService.getOne(new QueryWrapper<User>().eq("id",Long.valueOf(userId)));
@@ -74,9 +75,9 @@ public class AccountRealm extends AuthorizingRealm{
         if (account == null) {
             throw new UnknownAccountException("账户不存在");
         }
-        if (account.getAdmin()) {
-            throw new LockedAccountException("账户不是管理员");
-        }
+//        if (account.getAdmin()) {
+//            throw new LockedAccountException("账户不是管理员");
+//        }
 
         System.out.println(jwtToken);
 
@@ -85,7 +86,7 @@ public class AccountRealm extends AuthorizingRealm{
          * shiro通过subject工具获取用户信息
          */
         AccountProfile accountProfile = new AccountProfile();
-        BeanUtils.copyProperties(account, accountProfile);
+        BeanUtil.copyProperties(account, accountProfile);
 
         return new SimpleAuthenticationInfo(accountProfile, jwtToken.getCredentials(), getName());
     }
