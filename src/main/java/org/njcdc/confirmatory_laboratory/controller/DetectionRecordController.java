@@ -31,12 +31,21 @@ public class DetectionRecordController {
         return Result.success("保存成功",null);
     }
 
+    /*获取所有的检测记录*/
     @GetMapping("/getDetectionRecords/{acceptanceNumber}")
     public Result getDetectionRecords(@PathVariable(name = "acceptanceNumber") String acceptanceNumber ){
 
         return Result.success(detectionRecordsService.list(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber",acceptanceNumber)));
     }
 
+    /*获取后面三次发生在确证实验室的检测记录*/
+    @GetMapping("/getOtherThreeDetectionRecords/{acceptanceNumber}")
+    public Result getOtherThreeDetectionRecords(@PathVariable(name = "acceptanceNumber") String acceptanceNumber ){
+        return Result.success(detectionRecordsService.list(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber",acceptanceNumber).ne("testTime",1)));
+    }
+
+
+    /*获取筛查实验室的筛查检测记录*/
     @GetMapping("/getFirstDetectionRecord/{acceptanceNumber}")
     public Result getFirstDetectionRecord(@PathVariable(name = "acceptanceNumber") String acceptanceNumber ){
 
