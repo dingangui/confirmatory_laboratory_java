@@ -2,12 +2,8 @@ package org.njcdc.confirmatory_laboratory.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.subject.Subject;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.SampleBasicInfo;
-import org.njcdc.confirmatory_laboratory.mapper.SampleBasicInfoMapper;
 import org.njcdc.confirmatory_laboratory.service.SampleBasicInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -31,19 +27,15 @@ public class SampleBasicInfoController {
     @Autowired
     SampleBasicInfoService sampleBasicInfoService;
 
-
     @PostMapping("/save")
     public Result save(@Validated @RequestBody SampleBasicInfo sampleBasicInfo) {
 
-        Calendar cal = Calendar.getInstance();
-        System.out.println(sampleBasicInfo.toString());
-        int num = sampleBasicInfoService.list().size();
-        String acceptanceNumber = "A" + cal.get(Calendar.YEAR) + " - " + (num + 1);
-        sampleBasicInfo.setAcceptanceNumber(acceptanceNumber);
         sampleBasicInfo.setCurrentState("筛查实验室结果已导入");
         sampleBasicInfo.setOperation("录入第一次复检结果");
         sampleBasicInfo.setFlag("waitingForTest");
+
         Assert.isTrue(sampleBasicInfoService.save(sampleBasicInfo), "保存失败");
+
         return Result.success("保存成功");
 
     }
@@ -62,7 +54,7 @@ public class SampleBasicInfoController {
         return Result.success(acceptanceNumber);
     }
 
-    @GetMapping("/getSampleInfoByAcceptanceNumber/{acceptanceNumber}")
+    @GetMapping("/getSampleInfo/{acceptanceNumber}")
     public Result getSampleInfoByAcceptanceNumber(@PathVariable(name = "acceptanceNumber") String acceptanceNumber ){
 
         return Result.success(sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber",acceptanceNumber)));
