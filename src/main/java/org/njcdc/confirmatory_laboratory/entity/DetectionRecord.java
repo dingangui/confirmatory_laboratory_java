@@ -78,8 +78,8 @@ public class DetectionRecord implements Serializable {
     /**
      * 当前受理编号下的检测次数
      */
-    @TableField("testTime")
-    private int testTime;
+    @TableField("sequence")
+    private int sequence;
 
     /**
      * 检测人员ID

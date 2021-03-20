@@ -74,4 +74,11 @@ public class SampleBasicInfoController {
         System.out.println("currentState");
         return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().ne("currentState","表格可导出")));
     }
+
+    @GetMapping("/getFlag/{acceptanceNumber}")
+    public Result getFlag(@PathVariable String acceptanceNumber){
+
+        return Result.success(sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber",acceptanceNumber)).getFlag());
+
+    }
 }
