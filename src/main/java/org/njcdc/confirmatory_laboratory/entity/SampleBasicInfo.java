@@ -1,7 +1,8 @@
 package org.njcdc.confirmatory_laboratory.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import java.time.LocalDate;
+
+import java.sql.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
@@ -36,7 +37,7 @@ public class SampleBasicInfo implements Serializable {
     private String inspectionUnit;
 
     @TableField("inspectionDate")
-    private LocalDate inspectionDate;
+    private Date inspectionDate;
 
     @TableField("sampleType")
     private String sampleType;

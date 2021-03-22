@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.time.LocalDate;
 
 /**
@@ -44,7 +45,7 @@ public class DetectionRecord implements Serializable {
      * 检测时间
      */
     @TableField("detectionDate")
-    private LocalDate detectionDate;
+    private Date detectionDate;
 
     /**
      * 试剂和厂家
@@ -62,7 +63,7 @@ public class DetectionRecord implements Serializable {
      * 有效日期
      */
     @TableField("effectiveDate")
-    private LocalDate effectiveDate;
+    private Date effectiveDate;
 
     /**
      * 检测结果
@@ -144,7 +145,7 @@ public class DetectionRecord implements Serializable {
      * 报告日期
      */
     @TableField("reportDate")
-    private LocalDate reportDate;
+    private Date reportDate;
 
 
 }

@@ -71,13 +71,21 @@ public class SampleBasicInfoController {
 
     @GetMapping("/getAllOperableSampleList")
     public Result getAllOperableSampleList(){
-        System.out.println("currentState");
         return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().ne("currentState","表格可导出")));
+    }
+
+    @GetMapping("/getAllReviewableSampleList")
+    public Result getAllReviewableSampleList(){
+        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().eq("flag","waitingForReview")));
+    }
+
+    @GetMapping("/getAllDetectableSampleList")
+    public Result getAllDetectableSampleList(){
+        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().eq("flag","waitingForTest")));
     }
 
     @GetMapping("/getFlag/{acceptanceNumber}")
     public Result getFlag(@PathVariable String acceptanceNumber){
-
         return Result.success(sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber",acceptanceNumber)).getFlag());
 
     }
