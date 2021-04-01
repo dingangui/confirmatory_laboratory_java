@@ -63,8 +63,12 @@ public class DetectionRecordController {
         if (testTime == 1) {
 
             sampleBasicInfo.setCurrentState("第一次复检结果已录入");
-            sampleBasicInfo.setOperation("审核第一次复检结果");
-            sampleBasicInfo.setFlag("waitingForReview");
+//            取消了审核过程，“审核第一次复检结果”这一状态取消
+//            sampleBasicInfo.setOperation("审核第一次复检结果");
+//            sampleBasicInfo.setFlag("waitingForReview");
+
+            sampleBasicInfo.setOperation("输入第二次复检结果");
+            sampleBasicInfo.setFlag("waitingForTest");
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
 
@@ -80,8 +84,13 @@ public class DetectionRecordController {
         if (testTime == 2) {
 
             sampleBasicInfo.setCurrentState("第二次复检结果已录入");
-            sampleBasicInfo.setOperation("审核第二次复检结果");
-            sampleBasicInfo.setFlag("waitingForReview");
+
+ //            取消了审核过程，“审核第二次复检结果”这一状态取消
+//            sampleBasicInfo.setOperation("审核第二次复检结果");
+//            sampleBasicInfo.setFlag("waitingForReview");
+
+            sampleBasicInfo.setOperation("输入确证检测结果");
+            sampleBasicInfo.setFlag("waitingForTest");
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
 
@@ -97,14 +106,18 @@ public class DetectionRecordController {
          * */
         if (testTime == 3) {
             sampleBasicInfo.setCurrentState("确证检测结果已录入");
-            sampleBasicInfo.setOperation("审核确证检测结果");
-            sampleBasicInfo.setFlag("waitingForReview");
+
+//            取消了审核过程，“审核确证检测结果”这一状态取消
+//            sampleBasicInfo.setOperation("审核确证检测结果");
+//            sampleBasicInfo.setFlag("waitingForReview");
+
+            sampleBasicInfo.setOperation("导出报表");
+            sampleBasicInfo.setFlag("waitingForOutput");
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
 
             return Result.success("保存成功", "保存成功");
         }
-
 
         return Result.fail("检测次数有误");
 
@@ -130,7 +143,8 @@ public class DetectionRecordController {
         return Result.success(detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber).eq("sequence", 1)));
     }
 
-    @PostMapping("/inputReviewResult")
+//    取消审核检测结果这一流程
+    /*@PostMapping("/inputReviewResult")
     public Result inputReviewResult(@RequestBody DetectionRecord detectionRecord) {
 
         SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()));
@@ -146,10 +160,10 @@ public class DetectionRecordController {
         System.out.println("=================================================================");
         Assert.isTrue(detectionRecordsService.saveOrUpdate(detectionRecordNew), "保存失败");
 
-        /*
+        *//*
          * 如果审核的是第一条检测记录
          *
-         * */
+         * *//*
         if (detectionRecord.getSequence() == 1)
             return Result.fail("错误");
         if (detectionRecord.getSequence() == 2) {
@@ -178,7 +192,7 @@ public class DetectionRecordController {
         }
         return Result.fail("检测记录有误");
 
-    }
+    }*/
 
     /*获取第sequence次的检测记录*/
     @GetMapping("/getDetectionRecord/{acceptanceNumber}/{sequence}")

@@ -81,7 +81,7 @@ public class SampleBasicInfoController {
 
     @GetMapping("/getAllDetectableSampleList")
     public Result getAllDetectableSampleList(){
-        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().eq("flag","waitingForTest")));
+        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().in("flag","waitingForTest","waitingForReview")));
     }
 
     @GetMapping("/getFlag/{acceptanceNumber}")
