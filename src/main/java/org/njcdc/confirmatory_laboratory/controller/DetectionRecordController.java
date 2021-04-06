@@ -85,7 +85,7 @@ public class DetectionRecordController {
 
             sampleBasicInfo.setCurrentState("第二次复检结果已录入");
 
- //            取消了审核过程，“审核第二次复检结果”这一状态取消
+            //            取消了审核过程，“审核第二次复检结果”这一状态取消
 //            sampleBasicInfo.setOperation("审核第二次复检结果");
 //            sampleBasicInfo.setFlag("waitingForReview");
 
@@ -96,14 +96,13 @@ public class DetectionRecordController {
                 确证检测 or 导出报表
 
              */
-            String firstConclusion = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence",2)).getConclusion();
+            String firstConclusion = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence", 2)).getConclusion();
             String secondConclusion = detectionRecord.getConclusion();
 
-            if(firstConclusion.equals("HIV抗体阴性")&&secondConclusion.equals("HIV抗体阴性")){
+            if (firstConclusion.equals("HIV抗体阴性") && secondConclusion.equals("HIV抗体阴性")) {
                 sampleBasicInfo.setOperation("导出筛查阴性报表");
                 sampleBasicInfo.setFlag("waitingForOutput");
-            }
-            else{
+            } else {
                 sampleBasicInfo.setOperation("输入确证检测结果");
                 sampleBasicInfo.setFlag("waitingForTest");
             }
@@ -127,7 +126,7 @@ public class DetectionRecordController {
 //            sampleBasicInfo.setOperation("审核确证检测结果");
 //            sampleBasicInfo.setFlag("waitingForReview");
 
-            sampleBasicInfo.setOperation("导出报表");
+            sampleBasicInfo.setOperation("导出确证报表");
             sampleBasicInfo.setFlag("waitingForOutput");
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
@@ -177,9 +176,9 @@ public class DetectionRecordController {
         Assert.isTrue(detectionRecordsService.saveOrUpdate(detectionRecordNew), "保存失败");
 
         *//*
-         * 如果审核的是第一条检测记录
-         *
-         * *//*
+     * 如果审核的是第一条检测记录
+     *
+     * *//*
         if (detectionRecord.getSequence() == 1)
             return Result.fail("错误");
         if (detectionRecord.getSequence() == 2) {
