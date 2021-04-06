@@ -89,8 +89,24 @@ public class DetectionRecordController {
 //            sampleBasicInfo.setOperation("审核第二次复检结果");
 //            sampleBasicInfo.setFlag("waitingForReview");
 
-            sampleBasicInfo.setOperation("输入确证检测结果");
-            sampleBasicInfo.setFlag("waitingForTest");
+
+            /*
+
+            下面对下一步操作进行判断：
+                确证检测 or 导出报表
+
+             */
+            String firstConclusion = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence",2)).getConclusion();
+            String secondConclusion = detectionRecord.getConclusion();
+
+            if(firstConclusion.equals("HIV抗体阴性")&&secondConclusion.equals("HIV抗体阴性")){
+                sampleBasicInfo.setOperation("导出筛查阴性报表");
+                sampleBasicInfo.setFlag("waitingForOutput");
+            }
+            else{
+                sampleBasicInfo.setOperation("输入确证检测结果");
+                sampleBasicInfo.setFlag("waitingForTest");
+            }
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
 
@@ -201,6 +217,5 @@ public class DetectionRecordController {
         System.out.println("/getDetectionRecord/{acceptanceNumber}/{sequence}");
         return Result.success(detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber).eq("sequence", sequence)));
     }
-
 
 }
