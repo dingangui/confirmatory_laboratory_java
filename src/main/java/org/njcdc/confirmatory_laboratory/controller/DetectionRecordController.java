@@ -138,6 +138,15 @@ public class DetectionRecordController {
 
     }
 
+    @PostMapping("/update")
+    public Result update(@RequestBody DetectionRecord detectionRecord){
+        QueryWrapper<DetectionRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("acceptanceNumber", detectionRecord.getAcceptanceNumber());
+        Assert.isTrue(detectionRecordsService.update(detectionRecord,queryWrapper),"修改失败");
+
+        return Result.success("修改成功",null);
+    }
+
     /*获取所有的检测记录*/
     @GetMapping("/getDetectionRecords/{acceptanceNumber}")
     public Result getDetectionRecords(@PathVariable(name = "acceptanceNumber") String acceptanceNumber) {
