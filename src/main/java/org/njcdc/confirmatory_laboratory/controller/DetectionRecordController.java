@@ -93,14 +93,14 @@ public class DetectionRecordController {
             /*
 
             下面对下一步操作进行判断：
-                确证检测 or 导出报表
+                确证检测 or 导出报告
 
              */
             String firstConclusion = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence", 2)).getConclusion();
             String secondConclusion = detectionRecord.getConclusion();
 
             if (firstConclusion.equals("HIV抗体阴性") && secondConclusion.equals("HIV抗体阴性")) {
-                sampleBasicInfo.setOperation("导出筛查阴性报表");
+                sampleBasicInfo.setOperation("导出筛查阴性报告");
                 sampleBasicInfo.setFlag("waitingForOutput");
             } else {
                 sampleBasicInfo.setOperation("输入确证检测结果");
@@ -126,7 +126,7 @@ public class DetectionRecordController {
 //            sampleBasicInfo.setOperation("审核确证检测结果");
 //            sampleBasicInfo.setFlag("waitingForReview");
 
-            sampleBasicInfo.setOperation("导出确证报表");
+            sampleBasicInfo.setOperation("导出确证报告");
             sampleBasicInfo.setFlag("waitingForOutput");
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
@@ -139,12 +139,12 @@ public class DetectionRecordController {
     }
 
     @PostMapping("/update")
-    public Result update(@RequestBody DetectionRecord detectionRecord){
+    public Result update(@RequestBody DetectionRecord detectionRecord) {
         QueryWrapper<DetectionRecord> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("acceptanceNumber", detectionRecord.getAcceptanceNumber());
-        Assert.isTrue(detectionRecordsService.update(detectionRecord,queryWrapper),"修改失败");
+        queryWrapper.eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence", detectionRecord.getSequence());
+        Assert.isTrue(detectionRecordsService.update(detectionRecord, queryWrapper), "修改失败");
 
-        return Result.success("修改成功",null);
+        return Result.success("修改成功", null);
     }
 
     /*获取所有的检测记录*/
