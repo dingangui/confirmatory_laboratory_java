@@ -1,5 +1,6 @@
 package org.njcdc.confirmatory_laboratory.entity;
 
+import cn.hutool.core.date.DateTime;
 import com.baomidou.mybatisplus.annotation.IdType;
 
 import java.sql.Date;
@@ -88,4 +89,17 @@ public class SampleBasicInfo implements Serializable {
 
     @TableField("flag")
     private String flag;
+
+    // 创建时间
+    @TableField("createdTime")
+    private String createdTime;
+
+    // 是否已经删除
+    @TableField("deleted")
+    private Boolean deleted;
+
+    // 报告编号，每个样品都能生成一个报告
+    @TableField("reportNumber")
+    private String reportNumber;
+
 }

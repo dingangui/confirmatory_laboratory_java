@@ -1,20 +1,17 @@
 package org.njcdc.confirmatory_laboratory.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.extension.api.R;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.DetectionRecord;
 import org.njcdc.confirmatory_laboratory.entity.SampleBasicInfo;
 import org.njcdc.confirmatory_laboratory.service.DetectionRecordService;
 import org.njcdc.confirmatory_laboratory.service.SampleBasicInfoService;
-import org.njcdc.confirmatory_laboratory.util.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Calendar;
 
 /**
  * <p>
@@ -42,9 +39,13 @@ public class DetectionRecordController {
     @PostMapping("/save")
     public Result save(@RequestBody DetectionRecord detectionRecord) {
 
-        SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()));
+        SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(
+                new QueryWrapper<SampleBasicInfo>()
+                        .eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()));
 
         QueryWrapper<DetectionRecord> queryWrapper = new QueryWrapper<>();
+
+        // 测试次数，表示样品已经进行了多少次的测试了
         int testTime = detectionRecordsService.count(queryWrapper.eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()));
 
         detectionRecord.setSequence(testTime + 1);
@@ -99,16 +100,33 @@ public class DetectionRecordController {
             String firstConclusion = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", detectionRecord.getAcceptanceNumber()).eq("sequence", 2)).getConclusion();
             String secondConclusion = detectionRecord.getConclusion();
 
+            // 两次都是阴性，则导出筛查阴性报告
             if (firstConclusion.equals("HIV抗体阴性") && secondConclusion.equals("HIV抗体阴性")) {
                 sampleBasicInfo.setOperation("导出筛查阴性报告");
                 sampleBasicInfo.setFlag("waitingForOutput");
-            } else {
+
+                // 拼接筛查阴性报告编号
+                // 计算本年度确证结果阴性的报告数量
+                /*
+                    方法：本年度样品基本基本信息中的operation为“导出筛查阴性报告”的数量
+                    无论该样品信息是否删除都进行统计（避免重复）
+                 */
+                int year = Calendar.getInstance().get(Calendar.YEAR);
+
+                int number = sampleBasicInfoService.count(new QueryWrapper<SampleBasicInfo>()
+                        .eq("operation", "导出筛查阴性报告")
+                        .like("acceptanceNumber", year));
+
+                String reportNumber = "艾" + year + "-南京-阴-" + (number+1);
+                sampleBasicInfo.setReportNumber(reportNumber);
+            }
+            // 存在一次阳性，继续进行确证检测
+            else {
                 sampleBasicInfo.setOperation("输入确证检测结果");
                 sampleBasicInfo.setFlag("waitingForTest");
             }
 
             Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
-
             return Result.success("保存成功", "保存成功");
         }
 
@@ -120,17 +138,59 @@ public class DetectionRecordController {
          *
          * */
         if (testTime == 3) {
+
             sampleBasicInfo.setCurrentState("确证检测结果已录入");
-
-//            取消了审核过程，“审核确证检测结果”这一状态取消
-//            sampleBasicInfo.setOperation("审核确证检测结果");
-//            sampleBasicInfo.setFlag("waitingForReview");
-
             sampleBasicInfo.setOperation("导出确证报告");
             sampleBasicInfo.setFlag("waitingForOutput");
 
-            Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
+            /*
+            *   拼接报告编号
+                筛查阴性报告编号示例：如：2019-1，即：年度-流水号，流水号5位，
+                确证阴性报告编号示例：艾2019-南京-阴-1，2019是年度，1是流水
+                确证阳性报告编号示例：艾2019-南京-1，2019是年度，1是流水
+                结果不确定报告编号示例：艾2019-南京-疑-1，2019是年度，1是流水
+             */
+            int year = Calendar.getInstance().get(Calendar.YEAR);
+            String confDetectionConclusion = detectionRecord.getConclusion();
 
+            if (confDetectionConclusion.equals("HIV-1抗体不确定")) {
+
+                // 计算本年度确证结果不确定的报告数量
+                /*
+                    方法：本年度样品的最后一次检测记录中结果为“HIV-1抗体不确定”
+                 */
+                int number = detectionRecordsService.count(
+                        new QueryWrapper<DetectionRecord>()
+                                .eq("sequence", 4)
+                                .eq("conclusion", "HIV-1抗体不确定")
+                                .like("acceptanceNumber", year));
+                String reportNumber = "艾" + year + "-南京-疑-" + number;
+                sampleBasicInfo.setReportNumber(reportNumber);
+
+            }
+            if (confDetectionConclusion.equals("HIV-1抗体阳性")) {
+
+                // 计算本年度确证结果阳性的报告数量
+                int number = detectionRecordsService.count(new QueryWrapper<DetectionRecord>()
+                        .eq("sequence", 4)
+                        .eq("conclusion", "HIV-1抗体阳性")
+                        .like("acceptanceNumber", year));
+                String reportNumber = "艾" + year + "-南京-" + number;
+                sampleBasicInfo.setReportNumber(reportNumber);
+            }
+            if (confDetectionConclusion.equals("HIV抗体阴性")) {
+
+                // 计算本年度确证结果阴性的报告数量
+                int number = detectionRecordsService.count(new QueryWrapper<DetectionRecord>()
+                        .eq("sequence", 4)
+                        .eq("conclusion", "HIV抗体阴性")
+                        .like("acceptanceNumber", year));
+
+                String reportNumber = "艾" + year + "-南京-阴-" + number;
+                sampleBasicInfo.setReportNumber(reportNumber);
+            }
+
+            Assert.isTrue(sampleBasicInfoService.saveOrUpdate(sampleBasicInfo), "保存失败");
             return Result.success("保存成功", "保存成功");
         }
 
@@ -225,5 +285,6 @@ public class DetectionRecordController {
         System.out.println("/getDetectionRecord/{acceptanceNumber}/{sequence}");
         return Result.success(detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber).eq("sequence", sequence)));
     }
+
 
 }

@@ -1,6 +1,7 @@
 package org.njcdc.confirmatory_laboratory.controller;
 
 
+import cn.hutool.core.date.DateTime;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.njcdc.confirmatory_laboratory.common.lang.Result;
 import org.njcdc.confirmatory_laboratory.entity.DetectionRecord;
@@ -37,6 +38,7 @@ public class SampleBasicInfoController {
         sampleBasicInfo.setCurrentState("筛查实验室结果已导入");
         sampleBasicInfo.setOperation("录入第一次复检结果");
         sampleBasicInfo.setFlag("waitingForTest");
+        sampleBasicInfo.setCreatedTime(String.valueOf(new DateTime()));
 
         Assert.isTrue(sampleBasicInfoService.save(sampleBasicInfo), "保存失败");
 
@@ -46,15 +48,16 @@ public class SampleBasicInfoController {
 
     @GetMapping("/getAcceptanceNumber")
     public Result getAcceptanceNumber() {
-//
-//        Subject currentUser = SecurityUtils.getSubject();
-//
-//        currentUser.isAuthenticated();
-//
-//        currentUser.getPrincipal();
+
+
         Calendar cal = Calendar.getInstance();
-        int num = sampleBasicInfoService.count();
-        String acceptanceNumber = "A" + cal.get(Calendar.YEAR) + " - " + (num + 1);
+        //  获取当前年份的样品受理数量
+        int num = sampleBasicInfoService.count(
+                new QueryWrapper<SampleBasicInfo>()
+                        .like("acceptanceNumber",cal.get(Calendar.YEAR)));
+
+        String acceptanceNumber = "A" + cal.get(Calendar.YEAR) + "-" + (num + 1);
+
         return Result.success(acceptanceNumber);
     }
 
@@ -75,29 +78,43 @@ public class SampleBasicInfoController {
 
     @GetMapping("/getAllOperableSampleList")
     public Result getAllOperableSampleList() {
-        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().ne("currentState", "表格可导出")));
+        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>()
+                .eq("deleted",0)));
     }
 
     @GetMapping("/getAllReviewableSampleList")
     public Result getAllReviewableSampleList() {
-        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().eq("flag", "waitingForReview")));
+        return Result.success(sampleBasicInfoService.list(
+                new QueryWrapper<SampleBasicInfo>()
+                        .eq("flag", "waitingForReview")
+                        .eq("deleted",0)
+        ));
     }
 
     @GetMapping("/getAllDetectableSampleList")
     public Result getAllDetectableSampleList() {
-        return Result.success(sampleBasicInfoService.list(new QueryWrapper<SampleBasicInfo>().in("flag", "waitingForTest", "waitingForReview")));
+        return Result.success(sampleBasicInfoService.list(
+                new QueryWrapper<SampleBasicInfo>()
+                        .in("flag", "waitingForTest", "waitingForReview")
+                        .eq("deleted",0)));
     }
 
     @GetMapping("/getFlag/{acceptanceNumber}")
     public Result getFlag(@PathVariable String acceptanceNumber) {
-        return Result.success(sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber)).getFlag());
+        return Result.success(sampleBasicInfoService.getOne(
+                new QueryWrapper<SampleBasicInfo>()
+                .eq("acceptanceNumber", acceptanceNumber)).getFlag());
 
     }
 
     @GetMapping("/delete/{acceptanceNumber}")
     public Result delete(@PathVariable String acceptanceNumber) {
-        Assert.isTrue(sampleBasicInfoService.remove(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber)),"删除失败");
-        Assert.isTrue(detectionRecordsService.remove(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber)),"删除失败");
+        QueryWrapper<SampleBasicInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("acceptanceNumber", acceptanceNumber);
+        SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber));
+
+        sampleBasicInfo.setDeleted(true);
+        sampleBasicInfoService.update(sampleBasicInfo,queryWrapper);
         return Result.success("删除成功",null);
     }
 }
