@@ -7,10 +7,10 @@ import org.njcdc.confirmatory_laboratory.entity.DetectionRecord;
 import org.njcdc.confirmatory_laboratory.entity.SampleBasicInfo;
 import org.njcdc.confirmatory_laboratory.service.DetectionRecordService;
 import org.njcdc.confirmatory_laboratory.service.SampleBasicInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Calendar;
 
 /**
@@ -25,10 +25,10 @@ import java.util.Calendar;
 @RequestMapping("/detectionRecord")
 public class DetectionRecordController {
 
-    @Autowired
+    @Resource
     DetectionRecordService detectionRecordsService;
 
-    @Autowired
+    @Resource
     SampleBasicInfoService sampleBasicInfoService;
 
     @GetMapping("/getTestTime/{acceptanceNumber}")
@@ -52,7 +52,7 @@ public class DetectionRecordController {
         Assert.isTrue(detectionRecordsService.save(detectionRecord), "保存失败");
 
         if (testTime == 0) {
-            return Result.success("首次录入信息");
+            return Result.success("保存成功",null);
         }
         /*
          * 检测记录只有一条
@@ -198,6 +198,11 @@ public class DetectionRecordController {
 
     }
 
+    /*
+    修改的时候考虑两个情况
+
+    一个是经过两次或三次检测后，修改前两次的检测结论为阴性，这就会生成新的报告，
+     */
     @PostMapping("/update")
     public Result update(@RequestBody DetectionRecord detectionRecord) {
         QueryWrapper<DetectionRecord> queryWrapper = new QueryWrapper<>();
