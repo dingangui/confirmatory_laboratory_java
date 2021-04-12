@@ -117,7 +117,7 @@ public class DetectionRecordController {
                         .eq("operation", "导出筛查阴性报告")
                         .like("acceptanceNumber", year));
 
-                String reportNumber = "艾" + year + "-南京-阴-" + (number+1);
+                String reportNumber = year + "-" + (number+1);
                 sampleBasicInfo.setReportNumber(reportNumber);
             }
             // 存在一次阳性，继续进行确证检测

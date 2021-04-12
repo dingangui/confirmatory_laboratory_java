@@ -22,9 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 @RestController
@@ -38,9 +36,18 @@ public class ReportController {
     @Autowired
     SampleBasicInfoService sampleBasicInfoService;
 
+    @GetMapping("/reportOutput/{acceptanceNumber}")
+    public String reportOutput(HttpServletResponse response, @PathVariable String acceptanceNumber) throws IOException {
+        SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber));
+
+        if (sampleBasicInfo.getOperation().equals("导出筛查阴性报告"))
+            return screeningNegativeReport(response, acceptanceNumber);
+        else
+            return confReportOutput(response, acceptanceNumber);
+    }
+
     // 导出确证检测报告
-    @GetMapping("/confReportOutput/{acceptanceNumber}")
-    public Result confReportOutput(HttpServletResponse response, final HttpServletRequest request, @PathVariable String acceptanceNumber) throws IOException {
+    public String confReportOutput(HttpServletResponse response, String acceptanceNumber) throws IOException {
 
 
         SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber));
@@ -53,8 +60,8 @@ public class ReportController {
 
         Document document = new Document("src/main/resources/static/file/ConfReportTemplate.docx");
         /*
-        * 以下是替换样品基本信息的步骤
-        * */
+         * 以下是替换样品基本信息的步骤
+         * */
         document.replace("inspectionUnit", sampleBasicInfo.getInspectionUnit(), true, true);
         document.replace("inspectionDate", String.valueOf(sampleBasicInfo.getInspectionDate()), true, true);
         document.replace("sampleType", sampleBasicInfo.getSampleType(), true, true);
@@ -74,8 +81,8 @@ public class ReportController {
 
 
         /*
-        * 以下是替换样品检测信息的步骤
-        * */
+         * 以下是替换样品检测信息的步骤
+         * */
         document.replace("detectionDate0", String.valueOf(firstDetectionRecord.getDetectionDate()), true, true);
         document.replace("detectionDate1", String.valueOf(secondDetectionRecord.getDetectionDate()), true, true);
         document.replace("detectionDate2", String.valueOf(confDetectionRecord.getDetectionDate()), true, true);
@@ -85,15 +92,15 @@ public class ReportController {
 
 
         /*
-        * 以下是对批号和有效日期进行替换
-        * 都是采用确证检测记录的信息
-        * */
+         * 以下是对批号和有效日期进行替换
+         * 都是采用确证检测记录的信息
+         * */
         document.replace("batchNumber", confDetectionRecord.getBatchNumber(), true, true);
         document.replace("effectiveDate", String.valueOf(confDetectionRecord.getEffectiveDate()), true, true);
 
         /*
-        * 对样品编号、报告编号、报告日期进行替换
-        * */
+         * 对样品编号、报告编号、报告日期进行替换
+         * */
         document.replace("acceptanceNumber", acceptanceNumber, true, true);
         document.replace("reportNumber", sampleBasicInfo.getReportNumber(), true, true);
         document.replace("reportDate", new SimpleDateFormat("yyyy-MM-dd").format(new Date()), true, true);
@@ -124,22 +131,77 @@ public class ReportController {
             document.replace("note", "本报告一式二份，一份给送检单位，一份本中心留存。", true, true);
         }
 
-        /*
-        *
-        * */
+        document.saveToFile("src/main/resources/static/file/Temp.doc", FileFormat.Doc);
+        //把doc输出到输出流中
 
+        // 浏览器下载word
+        String fileName = sampleBasicInfo.getReportNumber() + ".doc";//被下载文件的名称
+        File file = new File("src/main/resources/static/file/Temp.doc");
+        if (downloadFile(response, file, fileName))
+            return "/";
+        return "/logout";
+    }
+
+
+    // 导出筛查阴性报告
+    public String screeningNegativeReport(HttpServletResponse response, String acceptanceNumber) throws IOException {
+        SampleBasicInfo sampleBasicInfo = sampleBasicInfoService.getOne(new QueryWrapper<SampleBasicInfo>().eq("acceptanceNumber", acceptanceNumber));
+        DetectionRecord firstDetectionRecord = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber).eq("sequence", 2));
+        DetectionRecord secondDetectionRecord = detectionRecordsService.getOne(new QueryWrapper<DetectionRecord>().eq("acceptanceNumber", acceptanceNumber).eq("sequence", 3));
+
+        Document document = new Document("src/main/resources/static/file/ScreeningNegativeReport.doc");
+
+        /*
+         * 以下是替换样品基本信息的步骤
+         * */
+        document.replace("inspectionUnit", sampleBasicInfo.getInspectionUnit(), true, true);
+        document.replace("inspectionDate", String.valueOf(sampleBasicInfo.getInspectionDate()), true, true);
+        document.replace("sampleType", sampleBasicInfo.getSampleType(), true, true);
+        document.replace("inspectedType", sampleBasicInfo.getInspectedType(), true, true);
+        document.replace("name", sampleBasicInfo.getName(), true, true);
+        document.replace("age", String.valueOf(sampleBasicInfo.getAge()), true, true);
+        document.replace("sex", sampleBasicInfo.getSex(), true, true);
+        document.replace("profession", sampleBasicInfo.getProfession(), true, true);
+        document.replace("country", sampleBasicInfo.getCountry(), true, true);
+        document.replace("nation", sampleBasicInfo.getNation(), true, true);
+        document.replace("marriage", sampleBasicInfo.getMarriage(), true, true);
+        document.replace("educationalLevel", sampleBasicInfo.getEducationalLevel(), true, true);
+        document.replace("IDNumber", sampleBasicInfo.getIDNumber(), true, true);
+        document.replace("phone", sampleBasicInfo.getPhone(), true, true);
+        document.replace("presentAddress", sampleBasicInfo.getPresentAddress(), true, true);
+        document.replace("residenceAddress", sampleBasicInfo.getResidenceAddress(), true, true);
+
+
+        /*
+         * 以下是替换样品检测信息的步骤
+         * */
+        document.replace("detectionDate0", String.valueOf(firstDetectionRecord.getDetectionDate()), true, true);
+        document.replace("detectionDate1", String.valueOf(firstDetectionRecord.getDetectionDate()), true, true);
+        document.replace("testResult0", firstDetectionRecord.getTestResult(), true, true);
+        document.replace("testResult1", secondDetectionRecord.getTestResult(), true, true);
+        document.replace("reagentsAndManufacturers0", firstDetectionRecord.getReagentsAndManufacturers(), true, true);
+        document.replace("reagentsAndManufacturers1", secondDetectionRecord.getReagentsAndManufacturers(), true, true);
+
+        /*
+         * 对样品编号、报告编号、报告日期进行替换
+         * */
+        document.replace("acceptanceNumber", acceptanceNumber, true, true);
+        document.replace("reportNumber", sampleBasicInfo.getReportNumber(), true, true);
+        document.replace("reportDate", new SimpleDateFormat("yyyy-MM-dd").format(new Date()), true, true);
 
         document.saveToFile("src/main/resources/static/file/Temp.doc", FileFormat.Doc);
         //把doc输出到输出流中
 
         // 浏览器下载word
-        String fileName = sampleBasicInfo.getReportNumber()+".doc";//被下载文件的名称
+        String fileName = sampleBasicInfo.getReportNumber() + ".doc";//被下载文件的名称
         File file = new File("src/main/resources/static/file/Temp.doc");
-        downloadFile(response,file,fileName);
-        return Result.success("下载成功",null);
+        downloadFile(response, file, fileName);
+        if (downloadFile(response, file, fileName))
+            return "/";
+        return "/logout";
     }
 
-    public void downloadFile(HttpServletResponse response,File file,String fileName) throws IOException {
+    public Boolean downloadFile(HttpServletResponse response, File file, String fileName) throws IOException {
         FileInputStream fis = null;
         ServletOutputStream os = null;
         try {
@@ -160,7 +222,7 @@ public class ReportController {
                     os.write(bytes);
                     i = fis.read(bytes);
                 }
-
+                return true;
             }
 
         } catch (IOException e) {
@@ -170,5 +232,6 @@ public class ReportController {
             os.close();
             fis.close();
         }
+        return false;
     }
 }
